@@ -20,6 +20,17 @@ class FileSelectWindow(Gtk.ApplicationWindow):
         self.app.image_path=""
         self.app.audio_path=""
 
+        self.header = Gtk.HeaderBar()
+        self.set_titlebar(self.header)
+
+        GLib.set_application_name("PodComb")
+
+        self.aboutButton = Gtk.Button()
+        self.aboutButton.set_icon_name("help-about")
+        self.header.pack_start(self.aboutButton)
+        
+        self.aboutButton.connect("clicked", self.on_aboutButton_clicked)
+
         grid = Gtk.Grid()
 
         grid.set_margin_top(10)
@@ -80,6 +91,22 @@ class FileSelectWindow(Gtk.ApplicationWindow):
     def on_button3_clicked(self, widget):
         
         self.output_video_chooser()
+
+    def on_aboutButton_clicked(self, widget):
+        self.about = Gtk.AboutDialog()
+        self.about.set_transient_for(self)  
+        self.about.set_modal(self)  
+
+        self.about.set_authors(["Otto Petäjä"])
+        self.about.set_copyright("Copyright 2023 Otto Petäjä")
+        self.about.set_license_type(Gtk.License.MIT_X11)
+        self.about.set_website("https://ottop.eu")
+        self.about.set_website_label("Check out my site")
+        self.about.set_version("1.0")
+
+        self.about.set_logo(Gtk.Image.new_from_file("eu.ottop.PodComb.svg").get_paintable())
+
+        self.about.set_visible(True)
 
     def fileChooser(self, fileType):
         self.open_dialog = Gtk.FileDialog.new()
