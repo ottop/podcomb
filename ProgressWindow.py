@@ -30,14 +30,25 @@ class ProgressWindow(Gtk.Window):
     def process_video(self, image_path, audio_path, output_path):
         def worker_thread():
             # Get the total duration of the audio file using ffprobe
-            ffprobe_cmd = [
-                'ffprobe',
-                '-v', 'error',
-                '-show_entries', 'format=duration',
-                '-of', 'default=noprint_wrappers=1:nokey=1',
-                audio_path
-            ]
-            duration = float(subprocess.check_output(ffprobe_cmd).strip())
+            try:
+                ffprobe_cmd = [
+                    'ffprobe',
+                    '-v', 'error',
+                    '-show_entries', 'format=duration',
+                    '-of', 'default=noprint_wrappers=1:nokey=1',
+                    audio_path
+                ]
+                duration = float(subprocess.check_output(ffprobe_cmd).strip())
+                if image_path == "":
+                    raise subprocess.CalledProcessError("You are missing an image","")
+            except subprocess.CalledProcessError:
+                self.progress_bar.set_visible(False)
+                self.label.set_text("Error: You are missing a file or there's an issue with the files")
+                affirmButton = Gtk.Button(label = "OK")
+
+                affirmButton.connect("clicked", self.on_affirmButton_clicked)
+                self.vbox.append(affirmButton)
+                raise PermissionError("Error: You are missing a file or there's an issue with the file types")
 
             # Set up the ffmpeg command
             ffmpeg_cmd = [

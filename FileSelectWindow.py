@@ -113,7 +113,7 @@ class FileSelectWindow(Gtk.ApplicationWindow):
 
             if file is not None:
 
-                print(f"File path is {file.get_path()}")
+                print(f"File path: {file.get_path()}")
 
                 if fileType == "image":
                     self.app.image_path = file.get_path()
@@ -149,6 +149,9 @@ class FileSelectWindow(Gtk.ApplicationWindow):
     def save_dialog_save_callback(self, dialog, result):
         file = dialog.save_finish(result)
         if file is not None:
+
+            print(f"File path: {file.get_path()}")
+
             filePath = file.get_path()
 
             loadingWindow = ProgressWindow()
