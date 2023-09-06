@@ -3,6 +3,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib, Gio
 import threading
 import subprocess
+from os import wait
 from ProgressWindow import ProgressWindow
 
 class FileSelectWindow(Gtk.ApplicationWindow):
@@ -73,11 +74,9 @@ class FileSelectWindow(Gtk.ApplicationWindow):
         self.fileChooser("audio")
 
     def on_button3_clicked(self, widget):
-        loadingWindow = ProgressWindow(self.app)
-        loadingWindow.set_visible(True)
-
+        
         # Start video processing in the background
-        loadingWindow.process_video(self.app.image_path, self.app.audio_path)
+        self.output_video_chooser()
 
     def fileChooser(self, fileType):
         self.open_dialog = Gtk.FileDialog.new()
@@ -103,9 +102,6 @@ class FileSelectWindow(Gtk.ApplicationWindow):
 
         self.open_dialog.set_filters(filters)  # Set the filters for the open dialog
         self.open_dialog.set_default_filter(f)
-        self.show_open_dialog(fileType)
-        
-    def show_open_dialog(self, fileType):
         self.open_dialog.open(self, None, self.open_dialog_open_callback, fileType)
         
     def open_dialog_open_callback(self, dialog, result, fileType):
@@ -129,3 +125,32 @@ class FileSelectWindow(Gtk.ApplicationWindow):
 
         except GLib.Error as error:
             print(f"Error opening file: {error.message}")
+    
+    def output_video_chooser(self):
+        self.save_dialog = Gtk.FileDialog.new()
+        
+        f = Gtk.FileFilter()
+
+        f.set_name("Video files")
+        f.add_mime_type("video/*")
+
+        filters = Gio.ListStore.new(Gtk.FileFilter)  # Create a ListStore with the type Gtk.FileFilter
+        filters.append(f)  # Add the file filter to the ListStore. You could add more.
+
+        self.save_dialog.set_filters(filters)  # Set the filters for the open dialog
+        self.save_dialog.set_default_filter(f)
+        self.save_dialog.save(self, None, self.save_dialog_save_callback)
+        
+    
+    def save_dialog_save_callback(self, dialog, result):
+        file = dialog.save_finish(result)
+        filePath = file.get_path()
+
+        loadingWindow = ProgressWindow(self.app)
+        loadingWindow.set_transient_for(self)
+        loadingWindow.set_modal(self)
+        loadingWindow.set_visible(True)
+        
+        loadingWindow.process_video(self.app.image_path, self.app.audio_path, filePath)
+        self.__init__(self.app)
+    

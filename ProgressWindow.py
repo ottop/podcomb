@@ -9,27 +9,27 @@ class ProgressWindow(Gtk.Window):
     def __init__(self, app):
         Gtk.Window.__init__(self, title="Video Processing")
         self.set_resizable(False)
-        self.set_default_size(400, 100)
+        self.set_default_size(300, 100)
 
         self.app = app
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
 
-        vbox.set_margin_top(10)
-        vbox.set_margin_bottom(10)
-        vbox.set_margin_start(10)
-        vbox.set_margin_end(10)
+        self.vbox.set_margin_top(10)
+        self.vbox.set_margin_bottom(10)
+        self.vbox.set_margin_start(10)
+        self.vbox.set_margin_end(10)
 
         self.label = Gtk.Label()
         self.label.set_text("Processing...")
-        vbox.append(self.label)
+        self.vbox.append(self.label)
 
         self.progress_bar = Gtk.ProgressBar()
-        vbox.append(self.progress_bar)
+        self.vbox.append(self.progress_bar)
 
-        self.set_child(vbox)
+        self.set_child(self.vbox)
 
-    def process_video(self, image_path, audio_path):
+    def process_video(self, image_path, audio_path, output_path):
         def worker_thread():
 
             # Get the total duration of the audio file using ffprobe
@@ -41,8 +41,6 @@ class ProgressWindow(Gtk.Window):
                 self.app.audio_path
             ]
             duration = float(subprocess.check_output(ffprobe_cmd).strip())
-
-            output_path = 'output_video.mp4'
 
             # Set up the ffmpeg command
             ffmpeg_cmd = [
@@ -80,11 +78,20 @@ class ProgressWindow(Gtk.Window):
             process.wait()
 
             # Actions on success
+            affirmButton = Gtk.Button(label = "OK")
+
+            affirmButton.connect("clicked", self.on_affirmButton_clicked)
+            self.vbox.append(affirmButton)
+
+            self.label.set_text("Finished!")
+            
             print("Video created successfully!")
-            self.destroy()
 
         self.thread = threading.Thread(target=worker_thread)
         self.thread.start()
+
+    def on_affirmButton_clicked(self,widget):
+        self.destroy()
 
     def update_progress(self, progress):
         self.progress_bar.set_fraction(progress)
