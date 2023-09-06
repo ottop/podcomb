@@ -6,12 +6,10 @@ import subprocess
 
 class ProgressWindow(Gtk.Window):
     
-    def __init__(self, app):
+    def __init__(self):
         Gtk.Window.__init__(self, title="Video Processing")
         self.set_resizable(False)
         self.set_default_size(300, 100)
-
-        self.app = app
 
         self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
 
@@ -31,14 +29,13 @@ class ProgressWindow(Gtk.Window):
 
     def process_video(self, image_path, audio_path, output_path):
         def worker_thread():
-
             # Get the total duration of the audio file using ffprobe
             ffprobe_cmd = [
                 'ffprobe',
                 '-v', 'error',
                 '-show_entries', 'format=duration',
                 '-of', 'default=noprint_wrappers=1:nokey=1',
-                self.app.audio_path
+                audio_path
             ]
             duration = float(subprocess.check_output(ffprobe_cmd).strip())
 
@@ -46,15 +43,16 @@ class ProgressWindow(Gtk.Window):
             ffmpeg_cmd = [
                 'ffmpeg',
                 '-loop', '1',
-                '-i', self.app.image_path,
-                '-i', self.app.audio_path,
+                '-i', image_path,
+                '-i', audio_path,
                 '-c:v', 'libx264',
                 '-tune', 'stillimage',
                 '-c:a', 'aac',
                 '-b:a', '192k',
                 '-pix_fmt', 'yuv420p',
                 '-shortest',
-                '-y',  # Overwrite output file if it exists
+                '-f', 'mp4',
+                '-y',  
                 output_path
             ]
 
@@ -63,8 +61,20 @@ class ProgressWindow(Gtk.Window):
 
             while True:
                 line = process.stderr.readline()
+                print(line)
+
+                if "No such file or directory" in line or "Permission denied" in line:
+                    self.progress_bar.set_visible(False)
+                    self.label.set_text("Error: Unable to write to "+output_path)
+                    affirmButton = Gtk.Button(label = "OK")
+
+                    affirmButton.connect("clicked", self.on_affirmButton_clicked)
+                    self.vbox.append(affirmButton)
+                    raise PermissionError("Cannot write to "+output_path)
+
                 if not line:
                     break
+
                 # Parse the ffmpeg output to get progress information
                 if "time=" in line:
                     time_str = line.split("time=")[1].split()[0]
@@ -73,9 +83,6 @@ class ProgressWindow(Gtk.Window):
                     progress = current_time / duration
                     # Update the progress bar in the GTK main thread
                     GLib.idle_add(self.update_progress, progress)
-
-            # Wait for the ffmpeg process to complete
-            process.wait()
 
             # Actions on success
             affirmButton = Gtk.Button(label = "OK")

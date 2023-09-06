@@ -5,6 +5,7 @@ import threading
 import subprocess
 from os import wait
 from ProgressWindow import ProgressWindow
+from datetime import datetime
 
 class FileSelectWindow(Gtk.ApplicationWindow):
 
@@ -15,6 +16,9 @@ class FileSelectWindow(Gtk.ApplicationWindow):
         self.set_default_size(300, 200)
         
         self.app = app
+
+        self.app.image_path=""
+        self.app.audio_path=""
 
         grid = Gtk.Grid()
 
@@ -75,7 +79,6 @@ class FileSelectWindow(Gtk.ApplicationWindow):
 
     def on_button3_clicked(self, widget):
         
-        # Start video processing in the background
         self.output_video_chooser()
 
     def fileChooser(self, fileType):
@@ -97,10 +100,10 @@ class FileSelectWindow(Gtk.ApplicationWindow):
             f.set_name("All files")
             f.add_mime_type("*")
 
-        filters = Gio.ListStore.new(Gtk.FileFilter)  # Create a ListStore with the type Gtk.FileFilter
-        filters.append(f)  # Add the file filter to the ListStore. You could add more.
+        filters = Gio.ListStore.new(Gtk.FileFilter) 
+        filters.append(f)  
 
-        self.open_dialog.set_filters(filters)  # Set the filters for the open dialog
+        self.open_dialog.set_filters(filters) 
         self.open_dialog.set_default_filter(f)
         self.open_dialog.open(self, None, self.open_dialog_open_callback, fileType)
         
@@ -131,26 +134,29 @@ class FileSelectWindow(Gtk.ApplicationWindow):
         
         f = Gtk.FileFilter()
 
-        f.set_name("Video files")
-        f.add_mime_type("video/*")
+        f.set_name("mp4")
+        f.add_mime_type("video/mp4")
 
-        filters = Gio.ListStore.new(Gtk.FileFilter)  # Create a ListStore with the type Gtk.FileFilter
-        filters.append(f)  # Add the file filter to the ListStore. You could add more.
+        filters = Gio.ListStore.new(Gtk.FileFilter) 
+        filters.append(f)
 
-        self.save_dialog.set_filters(filters)  # Set the filters for the open dialog
+        self.save_dialog.set_filters(filters) 
         self.save_dialog.set_default_filter(f)
+        self.save_dialog.set_initial_name("CombinedVideo"+datetime.now().strftime("-%d.%m.%Y.-%H:%M:%S")+".mp4")
         self.save_dialog.save(self, None, self.save_dialog_save_callback)
         
     
     def save_dialog_save_callback(self, dialog, result):
         file = dialog.save_finish(result)
-        filePath = file.get_path()
+        if file is not None:
+            filePath = file.get_path()
 
-        loadingWindow = ProgressWindow(self.app)
-        loadingWindow.set_transient_for(self)
-        loadingWindow.set_modal(self)
-        loadingWindow.set_visible(True)
-        
-        loadingWindow.process_video(self.app.image_path, self.app.audio_path, filePath)
-        self.__init__(self.app)
+            loadingWindow = ProgressWindow()
+            loadingWindow.set_transient_for(self)
+            loadingWindow.set_modal(self)
+            loadingWindow.set_visible(True)
+            
+            loadingWindow.process_video(self.app.image_path, self.app.audio_path, filePath)
+            self.__init__(self.app)
+            
     
