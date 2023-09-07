@@ -3,7 +3,7 @@
 ## What is PodComb?
 PodComb is an application that combines an image file with an audio file into a video. 
 
-It is written for Linux systems with GTK4. The binary was compiled on Ubuntu 23.04 with PyInstaller, so there may be issues with older systems. In that case, look into manual compilation.
+It is written for Linux systems with GTK4. The binary was compiled on Ubuntu 23.04 with PyInstaller, so there may be issues with older systems. In that case, build the application on your system.
 
 ## Screenshots
 ![Screenshot from 2023-09-07 21-25-33](https://github.com/ottop/podcomb/assets/60475104/51faca1b-8645-48bd-97f4-01648a31d3f0)
