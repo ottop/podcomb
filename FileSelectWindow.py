@@ -3,6 +3,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib, Gio
 from ProgressWindow import ProgressWindow
 from datetime import datetime
+from os.path import realpath, dirname
 
 class FileSelectWindow(Gtk.ApplicationWindow):
 
@@ -23,7 +24,7 @@ class FileSelectWindow(Gtk.ApplicationWindow):
         self.set_titlebar(self.header)
 
         #Set up the options to launch an about dialog
-    
+
         GLib.set_application_name("PodComb")
 
         self.aboutButton = Gtk.Button()
@@ -109,7 +110,7 @@ class FileSelectWindow(Gtk.ApplicationWindow):
         self.about.set_website("https://ottop.eu")
         self.about.set_website_label("Check out my site")
         self.about.set_version("1.0")
-        self.about.set_logo(Gtk.Image.new_from_file("eu.ottop.PodComb.svg").get_paintable())
+        self.about.set_logo(Gtk.Image.new_from_file(realpath(dirname(__file__))+"/eu.ottop.PodComb.svg").get_paintable())
 
         self.about.set_visible(True)
 

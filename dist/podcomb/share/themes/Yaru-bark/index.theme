@@ -1,0 +1,16 @@
+[Desktop Entry]
+Name=Yaru-bark
+Type=X-GNOME-Metatheme
+Comment=Ubuntu Yaru-bark theme
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Yaru-bark
+MetacityTheme=Yaru
+IconTheme=Yaru-bark
+CursorTheme=Yaru
+CursorSize=24
+X-Yaru-Dark=false
+X-Yaru-Accent-Name=bark
+X-Yaru-Accent-Color=#787859
+/build/yaru-theme-mnuoMj/yaru-theme-23.04.4/obj-x86_64-linux-gnu/gtk/src/Yaru-bark-bark-accent-color-info.scss:42 DEBUG: Contrast optimized accent is #9a9a77

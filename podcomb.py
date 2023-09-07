@@ -1,10 +1,9 @@
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 from FileSelectWindow import FileSelectWindow
 
 class PodCombApplication(Gtk.Application):
-
     imagePath=""
     audioPath=""
     def __init__(self):

@@ -1,0 +1,16 @@
+[Desktop Entry]
+Name=Yaru-sage
+Type=X-GNOME-Metatheme
+Comment=Ubuntu Yaru-sage theme
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Yaru-sage
+MetacityTheme=Yaru
+IconTheme=Yaru-sage
+CursorTheme=Yaru
+CursorSize=24
+X-Yaru-Dark=false
+X-Yaru-Accent-Name=sage
+X-Yaru-Accent-Color=#657B69
+/build/yaru-theme-mnuoMj/yaru-theme-23.04.4/obj-x86_64-linux-gnu/gtk/src/Yaru-sage-sage-accent-color-info.scss:42 DEBUG: Contrast optimized accent is #889d8c

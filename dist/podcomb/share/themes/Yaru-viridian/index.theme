@@ -1,0 +1,16 @@
+[Desktop Entry]
+Name=Yaru-viridian
+Type=X-GNOME-Metatheme
+Comment=Ubuntu Yaru-viridian theme
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Yaru-viridian
+MetacityTheme=Yaru
+IconTheme=Yaru-viridian
+CursorTheme=Yaru
+CursorSize=24
+X-Yaru-Dark=false
+X-Yaru-Accent-Name=viridian
+X-Yaru-Accent-Color=#03875B
+/build/yaru-theme-mnuoMj/yaru-theme-23.04.4/obj-x86_64-linux-gnu/gtk/src/Yaru-viridian-viridian-accent-color-info.scss:42 DEBUG: Contrast optimized accent is #04ad75

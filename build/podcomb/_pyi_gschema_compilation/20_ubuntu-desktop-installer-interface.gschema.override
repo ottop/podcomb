@@ -1,0 +1,3 @@
+[org.gnome.desktop.interface:ubuntu]
+color-scheme='prefer-dark'
+gtk-theme='Yaru-dark'
