@@ -1,5 +1,5 @@
 [Desktop Entry]
 Type=Application
 Name=PodComb
-Icon=eu.ottop.PodComb.svg
+Icon=/usr/share/icons/hicolor/scalable/apps/eu.ottop.PodComb.svg
 Exec=/usr/bin/podcomb
