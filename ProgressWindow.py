@@ -3,6 +3,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib, Gio
 import threading
 import subprocess
+import os
 
 class ProgressWindow(Gtk.Window):
     
@@ -10,6 +11,8 @@ class ProgressWindow(Gtk.Window):
         Gtk.Window.__init__(self, title="Video Processing")
         self.set_resizable(False)
         self.set_default_size(300, 100)
+
+        self.connect("close-request", self.on_close_button_pressed)
 
         self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
 
@@ -29,6 +32,10 @@ class ProgressWindow(Gtk.Window):
 
     def process_video(self, image_path, audio_path, output_path):
         def worker_thread():
+
+            self.output_path = output_path
+            self.processFinished = False
+
             # Get the total duration of the audio file using ffprobe
             try:
                 ffprobe_cmd = [
@@ -68,10 +75,10 @@ class ProgressWindow(Gtk.Window):
             ]
 
             # Create a subprocess and redirect stderr to a pipe
-            process = subprocess.Popen(ffmpeg_cmd, stderr=subprocess.PIPE, universal_newlines=True)
+            self.process = subprocess.Popen(ffmpeg_cmd, stderr=subprocess.PIPE, universal_newlines=True)
 
             while True:
-                line = process.stderr.readline()
+                line = self.process.stderr.readline()
                 print(line)
 
                 if "No such file or directory" in line or "Permission denied" in line:
@@ -84,6 +91,7 @@ class ProgressWindow(Gtk.Window):
                     raise PermissionError("Cannot write to "+output_path)
 
                 if not line:
+                    self.processFinished = True
                     break
 
                 # Parse the ffmpeg output to get progress information
@@ -103,7 +111,6 @@ class ProgressWindow(Gtk.Window):
 
             self.label.set_text("Finished!")
             
-            print("Video created successfully!")
 
         self.thread = threading.Thread(target=worker_thread)
         self.thread.start()
@@ -113,3 +120,10 @@ class ProgressWindow(Gtk.Window):
 
     def update_progress(self, progress):
         self.progress_bar.set_fraction(progress)
+    
+    def on_close_button_pressed(self, widget):
+        self.process.kill()
+        if not self.processFinished:
+            if os.path.exists(self.output_path):
+                os.remove(self.output_path)
+        self.destroy()
