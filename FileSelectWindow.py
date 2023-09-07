@@ -1,15 +1,14 @@
 import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib, Gio
-import threading
-import subprocess
-from os import wait
 from ProgressWindow import ProgressWindow
 from datetime import datetime
 
 class FileSelectWindow(Gtk.ApplicationWindow):
 
     def __init__(self, app):
+
+        # Set basic properties
         super().__init__(application=app)
         self.set_resizable(False)
         self.set_title("PodComb")
@@ -17,12 +16,14 @@ class FileSelectWindow(Gtk.ApplicationWindow):
         
         self.app = app
 
-        self.app.image_path=""
-        self.app.audio_path=""
+        self.app.imagePath=""
+        self.app.audioPath=""
 
         self.header = Gtk.HeaderBar()
         self.set_titlebar(self.header)
 
+        #Set up the options to launch an about dialog
+    
         GLib.set_application_name("PodComb")
 
         self.aboutButton = Gtk.Button()
@@ -43,28 +44,30 @@ class FileSelectWindow(Gtk.ApplicationWindow):
         infoText.set_justify(Gtk.Justification.CENTER)
         grid.attach(infoText, 0, 0, 3, 1)
 
-        self.button1 = Gtk.Button()
-        button1text = Gtk.Label(label="Select an image file")
+        # Set up the buttons
 
-        self.styleButton(self.button1, button1text , "image-x-generic")
+        self.imageButton = Gtk.Button()
+        imageButtonText = Gtk.Label(label="Select an image file")
 
-        self.button1.connect("clicked", self.on_button1_clicked)
-        grid.attach(self.button1, 0, 1, 1, 1)
+        self.styleButton(self.imageButton, imageButtonText , "image-x-generic")
 
-        self.button2 = Gtk.Button()
-        button2text = Gtk.Label(label="Select an audio file")
+        self.imageButton.connect("clicked", self.on_imageButton_clicked)
+        grid.attach(self.imageButton, 0, 1, 1, 1)
 
-        self.styleButton(self.button2, button2text, "audio-x-generic")
+        self.audioButton = Gtk.Button()
+        audioButtonText = Gtk.Label(label="Select an audio file")
 
-        self.button2.connect("clicked", self.on_button2_clicked)
-        grid.attach_next_to(self.button2, self.button1, Gtk.PositionType.BOTTOM, 1, 1)
+        self.styleButton(self.audioButton, audioButtonText, "audio-x-generic")
 
-        button3 = Gtk.Button(label="Combine")
+        self.audioButton.connect("clicked", self.on_audioButton_clicked)
+        grid.attach_next_to(self.audioButton, self.imageButton, Gtk.PositionType.BOTTOM, 1, 1)
 
-        button3.connect("clicked", self.on_button3_clicked)
-        grid.attach_next_to(button3, self.button1, Gtk.PositionType.RIGHT, 2, 2)
+        combineButton = Gtk.Button(label="Combine")
 
-        for button in {infoText, self.button1,self.button2,button3}:
+        combineButton.connect("clicked", self.on_combineButton_clicked)
+        grid.attach_next_to(combineButton, self.imageButton, Gtk.PositionType.RIGHT, 2, 2)
+
+        for button in {infoText, self.imageButton,self.audioButton,combineButton}:
             button.set_margin_top(5)
             button.set_margin_bottom(5)
             button.set_margin_start(5)
@@ -72,27 +75,30 @@ class FileSelectWindow(Gtk.ApplicationWindow):
   
         self.set_child(grid)
     
-    def styleButton(self, button, buttontext, icon):
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        button.set_child(hbox)
+    def styleButton(self, button, buttonText, icon):
 
-        buttonimage = Gtk.Image()
-        buttonimage.set_from_icon_name(icon)
+        hBox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        button.set_child(hBox)
 
-        hbox.append(buttonimage)
-        hbox.append(buttontext)
+        buttonImage = Gtk.Image()
+        buttonImage.set_from_icon_name(icon)
 
-    def on_button1_clicked(self, widget):
-        self.fileChooser("image")
+        hBox.append(buttonImage)
+        hBox.append(buttonText)
 
-    def on_button2_clicked(self, widget):
-        self.fileChooser("audio")
+    #Set up button actions
 
-    def on_button3_clicked(self, widget):
-        
+    def on_imageButton_clicked(self, widget):
+        self.file_chooser("image")
+
+    def on_audioButton_clicked(self, widget):
+        self.file_chooser("audio")
+
+    def on_combineButton_clicked(self, widget):
         self.output_video_chooser()
 
     def on_aboutButton_clicked(self, widget):
+
         self.about = Gtk.AboutDialog()
         self.about.set_transient_for(self)  
         self.about.set_modal(self)  
@@ -103,37 +109,38 @@ class FileSelectWindow(Gtk.ApplicationWindow):
         self.about.set_website("https://ottop.eu")
         self.about.set_website_label("Check out my site")
         self.about.set_version("1.0")
-
         self.about.set_logo(Gtk.Image.new_from_file("eu.ottop.PodComb.svg").get_paintable())
 
         self.about.set_visible(True)
 
-    def fileChooser(self, fileType):
-        self.open_dialog = Gtk.FileDialog.new()
-        self.open_dialog.set_title("Select a File")
+    def file_chooser(self, fileType):
 
-        f = Gtk.FileFilter()
+        self.openDialog = Gtk.FileDialog.new()
+        self.openDialog.set_title("Select a File")
+
+        typeFilter = Gtk.FileFilter()
 
         if fileType == "image":
-            f.set_name("Image files")
-            f.add_mime_type("image/*")
+            typeFilter.set_name("Image files")
+            typeFilter.add_mime_type("image/*")
 
         elif fileType == "audio":
-            f.set_name("Audio files")
-            f.add_mime_type("audio/*")
+            typeFilter.set_name("Audio files")
+            typeFilter.add_mime_type("audio/*")
 
         else:
             print("This shouldn't happen")
-            f.set_name("All files")
-            f.add_mime_type("*")
+            typeFilter.set_name("All files")
+            typeFilter.add_mime_type("*")
 
         filters = Gio.ListStore.new(Gtk.FileFilter) 
-        filters.append(f)  
+        filters.append(typeFilter)  
 
-        self.open_dialog.set_filters(filters) 
-        self.open_dialog.set_default_filter(f)
-        self.open_dialog.open(self, None, self.open_dialog_open_callback, fileType)
+        self.openDialog.set_filters(filters) 
+        self.openDialog.set_default_filter(typeFilter)
+        self.openDialog.open(self, None, self.open_dialog_open_callback, fileType)
         
+    #Function that runs after the user picks a file in the file chooser
     def open_dialog_open_callback(self, dialog, result, fileType):
         try:
             file = dialog.open_finish(result)
@@ -143,37 +150,38 @@ class FileSelectWindow(Gtk.ApplicationWindow):
                 print(f"File path: {file.get_path()}")
 
                 if fileType == "image":
-                    self.app.image_path = file.get_path()
-                    self.styleButton(self.button1, Gtk.Label(label=file.get_basename()), "image-x-generic")
+                    self.app.imagePath = file.get_path()
+                    self.styleButton(self.imageButton, Gtk.Label(label=file.get_basename()), "image-x-generic")
 
                 elif fileType == "audio":
-                    self.app.audio_path = file.get_path()
-                    self.styleButton(self.button2, Gtk.Label(label=file.get_basename()), "audio-x-generic")
+                    self.app.audioPath = file.get_path()
+                    self.styleButton(self.audioButton, Gtk.Label(label=file.get_basename()), "audio-x-generic")
                 
                 else:
                     print("This shouldn't happen")
 
+        #Errors out when input file lacks read permissions or has some other problem. Will add a separate gui error dialog in a future release as it's not an urgent issue.
         except GLib.Error as error:
             print(f"Error opening file: {error.message}")
     
     def output_video_chooser(self):
-        self.save_dialog = Gtk.FileDialog.new()
+        self.saveDialog = Gtk.FileDialog.new()
         
-        f = Gtk.FileFilter()
+        typeFilter = Gtk.FileFilter()
 
-        f.set_name("mp4")
-        f.add_mime_type("video/mp4")
+        typeFilter.set_name("mp4")
+        typeFilter.add_mime_type("video/mp4")
 
         filters = Gio.ListStore.new(Gtk.FileFilter) 
-        filters.append(f)
+        filters.append(typeFilter)
 
-        self.save_dialog.set_filters(filters) 
-        self.save_dialog.set_default_filter(f)
-        self.save_dialog.set_initial_name("CombinedVideo"+datetime.now().strftime("-%d.%m.%Y.-%H:%M:%S")+".mp4")
-        self.save_dialog.save(self, None, self.save_dialog_save_callback)
+        self.saveDialog.set_filters(filters) 
+        self.saveDialog.set_default_filter(typeFilter)
+        self.saveDialog.set_initial_name("CombinedVideo"+datetime.now().strftime("-%d.%m.%Y.-%H:%M:%S")+".mp4")
+        self.saveDialog.save(self, None, self.open_dialog_save_callback)
         
     
-    def save_dialog_save_callback(self, dialog, result):
+    def open_dialog_save_callback(self, dialog, result):
         file = dialog.save_finish(result)
         if file is not None:
 
@@ -186,7 +194,7 @@ class FileSelectWindow(Gtk.ApplicationWindow):
             loadingWindow.set_modal(self)
             loadingWindow.set_visible(True)
             
-            loadingWindow.process_video(self.app.image_path, self.app.audio_path, filePath)
+            loadingWindow.process_video(self.app.imagePath, self.app.audioPath, filePath)
             self.__init__(self.app)
             
     
